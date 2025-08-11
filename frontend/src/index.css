@@ -1,0 +1,11 @@
+@font-face{
+    font-family:Poppins;
+    src:url("../src/assets/fonts/Poppins-Regular.ttf");
+}
+
+@import "tailwindcss";
+@import 'leaflet/dist/leaflet.css';
+
+@theme{
+    --font-poppins: Poppins,"sans-serif";
+}
