@@ -29,6 +29,7 @@ import IceCard from './pages/IceCard.jsx';
 import IcePublic from './pages/IcePublic.jsx';
 import IceApprove from './pages/IceApprove.jsx';
 import Profile from './pages/profile.jsx';
+import Notifications from './pages/Notifications.jsx';
 import PrivacyPolicy from './pages/PrivacyPolicy.jsx';
 import { AuthProvider } from './context/AuthContext';
 import { EmergencyDataProvider } from './context/EmergencyDataContext.jsx';
@@ -52,6 +53,7 @@ const router = createBrowserRouter(
       <Route path="contact" element={<ContactUs />} />
       <Route path="login" element={<Login />} />
       <Route path="profile" element={<Profile />} />
+  <Route path="notifications" element={<Notifications />} />
   <Route path="privacy-policy" element={<PrivacyPolicy />} />
 
     </Route>

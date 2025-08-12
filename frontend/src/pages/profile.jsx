@@ -245,7 +245,7 @@ export default function Profile() {
                   </li>
                   <li>
                     <a href="/notifications" className="flex items-center text-gray-600 hover:text-[#6C0B14] transition-colors">
-                      <span className="mr-2">🔔</span> Notification Settings
+                      <span className="mr-2">🔔</span> Notifications
                     </a>
                   </li>
                    <li>
