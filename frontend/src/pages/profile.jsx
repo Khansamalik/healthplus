@@ -31,7 +31,7 @@ const ProfileField = ({ label, value, highlight = false }) => (
 
 export default function Profile() {
   const navigate = useNavigate();
-  const { logout, isPremium: authIsPremium, premiumPlan } = useAuth();
+  const { logout, isPremium: authIsPremium, premiumPlan, downgradeToBasic } = useAuth();
   const [user, setUser] = useState(null);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
@@ -52,6 +52,7 @@ export default function Profile() {
   });
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+  const [showDowngradeModal, setShowDowngradeModal] = useState(false);
 
   const userId = localStorage.getItem("userId");
   const API = "http://localhost:5000";
@@ -157,6 +158,17 @@ export default function Profile() {
     }
   };
 
+  const handleDowngrade = async () => {
+    try {
+      await downgradeToBasic();
+      setShowDowngradeModal(false);
+      // Refresh user data to reflect changes
+      window.location.reload();
+    } catch (error) {
+      // Error is already handled in downgradeToBasic function
+    }
+  };
+
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -207,7 +219,7 @@ export default function Profile() {
                   </div>
                   {!authIsPremium && (
                     <button
-                      onClick={() => setShowPayment(true)}
+                      onClick={() => navigate('/premium')}
                       className="w-full mt-3 bg-[#6C0B14] text-white py-2 rounded-lg hover:bg-[#8a1220] transition-colors"
                     >
                       Upgrade to Premium
@@ -326,11 +338,19 @@ export default function Profile() {
                           <ProfileField label="Subscription Start" value={user.subscriptionStart ? new Date(user.subscriptionStart).toLocaleDateString() : '—'} />
                           <ProfileField label="Subscription End" value={user.subscriptionEnd ? new Date(user.subscriptionEnd).toLocaleDateString() : '—'} />
                           <ProfileField label="Auto Renewal" value={user.autoRenew ? "Enabled" : "Disabled"} />
+                          <div className="pt-4 text-center">
+                            <button 
+                              onClick={() => setShowDowngradeModal(true)}
+                              className="px-6 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                            >
+                              Cancel Subscription
+                            </button>
+                          </div>
                         </>
                       ) : (
                         <div className="text-center py-4">
                           <p className="text-gray-600 mb-4">Upgrade to unlock premium features</p>
-                          <button onClick={() => setShowPayment(true)} className="px-6 py-2 bg-[#6C0B14] text-white rounded-lg hover:bg-[#8a1220] transition-colors">View Payment Methods</button>
+                          <button onClick={() => navigate('/premium')} className="px-6 py-2 bg-[#6C0B14] text-white rounded-lg hover:bg-[#8a1220] transition-colors">Subscribe to Premium</button>
                         </div>
                       )}
                     </div>
@@ -371,6 +391,11 @@ export default function Profile() {
       </main>
   {/* Modals */}
   <PaymentMethodsModal open={showPayment} onClose={() => setShowPayment(false)} />
+  <DowngradeModal 
+    open={showDowngradeModal} 
+    onClose={() => setShowDowngradeModal(false)}
+    onConfirm={handleDowngrade}
+  />
       <PasswordModal
         open={showPasswordModal}
         onClose={() => setShowPasswordModal(false)}
@@ -444,6 +469,45 @@ function PaymentMethodsModal({ open, onClose }) {
         </div>
         <div className="p-4 border-t flex justify-end">
           <button onClick={onClose} className="px-4 py-2 rounded-lg bg-[#6C0B14] text-white hover:bg-[#8a1220]">Close</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DowngradeModal({ open, onClose, onConfirm }) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white w-full max-w-md rounded-xl shadow-lg">
+        <div className="p-6">
+          <h3 className="text-xl font-bold text-[#6C0B14] mb-4">Cancel Subscription</h3>
+          <p className="text-gray-600 mb-4">
+            Are you sure you want to cancel your premium subscription? You will lose access to:
+          </p>
+          <ul className="list-disc list-inside text-gray-600 mb-4 space-y-1">
+            <li>Medical records storage</li>
+            <li>Pharmacy and lab access</li>
+            <li>Advanced emergency features</li>
+            <li>Priority support</li>
+          </ul>
+          <p className="text-sm text-gray-500 mb-6">
+            You can resubscribe anytime from the premium page.
+          </p>
+        </div>
+        <div className="p-4 border-t flex gap-3 justify-end">
+          <button 
+            onClick={onClose}
+            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+          >
+            Keep Premium
+          </button>
+          <button 
+            onClick={onConfirm}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+          >
+            Cancel Subscription
+          </button>
         </div>
       </div>
     </div>

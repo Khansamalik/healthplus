@@ -41,8 +41,8 @@ export default function IceCard() {
         const res = await ensureIceCode();
         if (res?.code) {
           setIceCode(res.code);
-          const frontendOrigin = window.location.origin;
-          const url = `${frontendOrigin}/ice/public/${res.code}`;
+          const baseUrl = (import.meta.env?.VITE_PUBLIC_BASE_URL || window.location.origin).replace(/\/$/, '');
+          const url = `${baseUrl}/ice/public/${res.code}`;
           setPublicUrl(url);
           setQrCodeData(url);
         } else {
@@ -199,7 +199,14 @@ export default function IceCard() {
               )}
             </div>
             {publicUrl && (
-              <p className="text-xs text-gray-600 mb-4 break-all">Scan or visit: {publicUrl}</p>
+              <>
+                <p className="text-xs text-gray-600 mb-1 break-all">Scan or visit: {publicUrl}</p>
+                {publicUrl.includes('localhost') && (
+                  <p className="text-xs text-yellow-700 bg-yellow-50 border border-yellow-200 inline-block px-2 py-1 rounded">
+                    Tip: Set VITE_PUBLIC_BASE_URL to your PC IP (e.g. http://192.168.x.x:5180) for scanning from a phone.
+                  </p>
+                )}
+              </>
             )}
             
             <div className="space-y-2 mb-6">

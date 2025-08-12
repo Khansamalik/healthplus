@@ -7,7 +7,7 @@ import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login: setAuth, upgradeToPremium } = useAuth();
+  const { login: setAuth } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -53,12 +53,8 @@ export default function Login() {
       localStorage.setItem("userId", result.user.id);
       localStorage.setItem("token", result.token);
       
-      // Update auth context
+      // Update auth context (this will now handle premium status automatically)
       setAuth(result.user, result.token);
-      
-      if (result.user.premium) {
-        upgradeToPremium(result.user.plan || "pro");
-      }
       
       navigate("/pro");
     } else {
