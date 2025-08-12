@@ -1,4 +1,7 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Footer() {
   return (
@@ -24,7 +27,7 @@ export default function Footer() {
               <li><a href="/" className="hover:underline">Home</a></li>
               <li><a href="/about" className="hover:underline">About Us</a></li>
               <li><a href="/contact" className="hover:underline">Contact</a></li>
-              <li><a href="/privacy" className="hover:underline">Privacy Policy</a></li>
+              <li><Link to="/privacy-policy" className="hover:underline">Privacy Policy</Link></li>
             </ul>
           </div>
         </div>
@@ -41,9 +44,13 @@ export default function Footer() {
               placeholder="Enter your email"
               className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm placeholder-gray-500 outline-none focus:ring-2 focus:ring-[#7B1E22]"
             />
-            <button className="bg-[#7B1E22] text-white text-sm px-4 py-2 rounded hover:bg-[#5f1316] transition">
+            <button
+              className="bg-[#7B1E22] text-white text-sm px-4 py-2 rounded hover:bg-[#5f1316] transition"
+              onClick={() => toast.success("Subscribed! You'll stay connected with updates.")}
+            >
               Subscribe
             </button>
+            <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar={false} />
           </div>
         </div>
       </div>

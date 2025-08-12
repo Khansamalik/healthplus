@@ -214,7 +214,7 @@ export default function HealthcareWebsite() {
             Join thousands who trust Sehat Plus for their emergency healthcare needs
           </p>
           <Link
-            to="/signup"
+            to="/register"
             className="inline-block bg-white text-[#6C0B14] hover:bg-gray-100 font-bold py-3 px-8 rounded-full text-lg transition-all duration-300"
           >
             Create Your Account
