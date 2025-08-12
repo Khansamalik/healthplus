@@ -23,12 +23,13 @@ import {
 import { SiEasyeda } from "react-icons/si";
 
 export default function PremiumPatient() {
-  const { isPremium, premiumPlan, upgradeToPremium } = useAuth();
+  const { isPremium, premiumPlan, upgradeToPremium, downgradeToBasic } = useAuth();
   const navigate = useNavigate();
   const pricingRef = useRef(null); 
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [initialPlanForModal, setInitialPlanForModal] = useState(null);
   const [devControlsOpen, setDevControlsOpen] = useState(false);
+  const [showDowngradeConfirm, setShowDowngradeConfirm] = useState(false);
   const scrollToPricing = () => {
     if (pricingRef.current) {
       pricingRef.current.scrollIntoView({ behavior: "smooth" });
@@ -88,6 +89,17 @@ export default function PremiumPatient() {
     }, 1000);
   };
 
+  const handleDowngrade = async () => {
+    try {
+      await downgradeToBasic();
+      setShowDowngradeConfirm(false);
+      // Refresh the page to show updated status
+      window.location.reload();
+    } catch (error) {
+      // Error already handled in downgradeToBasic function
+    }
+  };
+
 
   // DEV-ONLY: temporary test helpers (visible only in development/for testing)
   const devResetPremium = () => {
@@ -109,16 +121,24 @@ export default function PremiumPatient() {
       {/* Success Banner for Premium Users */}
       {isPremium && (
         <div className="bg-green-50 border-l-4 border-green-400 p-4 mb-4">
-          <div className="flex items-center">
-            <FaCheckCircle className="text-green-400 mr-2" />
-            <div>
-              <p className="text-green-700 font-medium">
-                Premium Active - {premiumPlan === 'pro' ? 'Pro Care' : 'Annual'} Plan
-              </p>
-              <p className="text-green-600 text-sm">
-                You have access to all premium features
-              </p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <FaCheckCircle className="text-green-400 mr-2" />
+              <div>
+                <p className="text-green-700 font-medium">
+                  Premium Active - {premiumPlan === 'pro' ? 'Pro Care' : 'Annual'} Plan
+                </p>
+                <p className="text-green-600 text-sm">
+                  You have access to all premium features
+                </p>
+              </div>
             </div>
+            <button 
+              onClick={() => setShowDowngradeConfirm(true)}
+              className="text-red-600 text-sm underline hover:text-red-800 transition"
+            >
+              Cancel Subscription
+            </button>
           </div>
         </div>
       )}
@@ -385,6 +405,41 @@ export default function PremiumPatient() {
       onUpgrade={handleUpgrade}
       initialPlan={initialPlanForModal}
     />
+
+    {/* Downgrade Confirmation Modal */}
+    {showDowngradeConfirm && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
+          <h2 className="text-2xl font-bold text-[#6C0B14] mb-4">Cancel Subscription</h2>
+          <p className="text-gray-600 mb-6">
+            Are you sure you want to cancel your premium subscription? You will lose access to:
+          </p>
+          <ul className="list-disc list-inside text-gray-600 mb-6 space-y-1">
+            <li>Medical records storage</li>
+            <li>Pharmacy and lab access</li>
+            <li>Advanced emergency features</li>
+            <li>Priority support</li>
+          </ul>
+          <p className="text-sm text-gray-500 mb-6">
+            You can resubscribe anytime, but your data and preferences may not be saved.
+          </p>
+          <div className="flex gap-4">
+            <button
+              onClick={() => setShowDowngradeConfirm(false)}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+            >
+              Keep Premium
+            </button>
+            <button
+              onClick={handleDowngrade}
+              className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+            >
+              Cancel Subscription
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
     </div>
   );
 }

@@ -11,4 +11,8 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    host: true, // listen on all addresses, allows LAN devices to connect
+    port: 5180,
+  },
 });

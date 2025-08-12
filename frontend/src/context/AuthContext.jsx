@@ -77,11 +77,24 @@ export function AuthProvider({ children }) {
     setUser(userData);
     setToken(authToken);
     
+    // Handle premium status from server response
+    if (userData.premium) {
+      setIsPremium(true);
+      setPremiumPlan(userData.plan || 'pro');
+      localStorage.setItem('isPremium', 'true');
+      localStorage.setItem('premiumPlan', userData.plan || 'pro');
+    } else {
+      setIsPremium(false);
+      setPremiumPlan(null);
+      localStorage.removeItem('isPremium');
+      localStorage.removeItem('premiumPlan');
+    }
+    
     // Save to localStorage
     localStorage.setItem('token', authToken);
     localStorage.setItem('user', JSON.stringify(userData));
     
-    console.log('User logged in:', { userData, tokenExists: !!authToken });
+    console.log('User logged in:', { userData, tokenExists: !!authToken, premium: userData.premium });
   };
   
   const logout = () => {
@@ -100,21 +113,99 @@ export function AuthProvider({ children }) {
     console.log('User logged out');
   };
 
-  const upgradeToPremium = (plan) => {
-    setIsPremium(true);
-    setPremiumPlan(plan);
-    localStorage.setItem('isPremium', 'true');
-    localStorage.setItem('premiumPlan', plan);
-    
-    // Show success message
-    alert(`Successfully upgraded to ${plan === 'pro' ? 'Pro Care' : 'Annual'} plan! You now have access to all premium features.`);
+  const upgradeToPremium = async (plan) => {
+    try {
+      // Call backend API to upgrade user in database
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+      
+      if (!token || !userId) {
+        throw new Error('User not authenticated');
+      }
+      
+      const response = await fetch(`http://localhost:5000/api/profile/${userId}/premium`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ plan })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to upgrade to premium');
+      }
+      
+      const result = await response.json();
+      
+      // Update local state
+      setIsPremium(true);
+      setPremiumPlan(plan);
+      localStorage.setItem('isPremium', 'true');
+      localStorage.setItem('premiumPlan', plan);
+      
+      // Update user data
+      const updatedUser = { ...user, premium: true, plan };
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      // Show success message
+      alert(`Successfully upgraded to ${plan === 'pro' ? 'Pro Care' : 'Annual'} plan! You now have access to all premium features.`);
+      
+      return result;
+    } catch (error) {
+      console.error('Premium upgrade error:', error);
+      alert('Failed to upgrade to premium. Please try again.');
+      throw error;
+    }
   };
 
-  const downgradeToBasic = () => {
-    setIsPremium(false);
-    setPremiumPlan(null);
-    localStorage.removeItem('isPremium');
-    localStorage.removeItem('premiumPlan');
+  const downgradeToBasic = async () => {
+    try {
+      // Call backend API to downgrade user in database
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+      
+      if (!token || !userId) {
+        throw new Error('User not authenticated');
+      }
+      
+      const response = await fetch(`http://localhost:5000/api/profile/${userId}/downgrade`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to downgrade from premium');
+      }
+      
+      const result = await response.json();
+      
+      // Update local state
+      setIsPremium(false);
+      setPremiumPlan(null);
+      localStorage.removeItem('isPremium');
+      localStorage.removeItem('premiumPlan');
+      
+      // Update user data
+      const updatedUser = { ...user, premium: false, plan: null };
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      // Show success message
+      alert('Successfully downgraded to basic plan. You can upgrade again anytime!');
+      
+      return result;
+    } catch (error) {
+      console.error('Premium downgrade error:', error);
+      alert('Failed to downgrade from premium. Please try again.');
+      throw error;
+    }
   };
 
   return (

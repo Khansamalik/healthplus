@@ -39,6 +39,7 @@ export default function IcePublic() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
+        <div className="h-24"></div>
       <div className="max-w-2xl mx-auto bg-white rounded-xl shadow p-6">
         <h1 className="text-2xl font-bold text-[#6C0B14] mb-4">Emergency Information</h1>
         <div className="space-y-3">

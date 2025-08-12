@@ -75,4 +75,65 @@ profilerouter.patch('/:id/password', async (req, res) => {
   }
 });
 
+// Upgrade to premium
+profilerouter.patch('/:id/premium', async (req, res) => {
+  try {
+    const { plan } = req.body;
+    
+    // Validate plan
+    if (!plan || !['pro', 'annual'].includes(plan)) {
+      return res.status(400).json({ message: 'Valid plan (pro or annual) is required' });
+    }
+    
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { isPremium: true },
+      { new: true }
+    );
+    
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    
+    res.json({ 
+      message: 'Successfully upgraded to premium!',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        premium: user.isPremium,
+        plan: plan
+      }
+    });
+  } catch (err) {
+    console.error('Premium upgrade error:', err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+// Downgrade from premium (revoke premium status)
+profilerouter.patch('/:id/downgrade', async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { isPremium: false },
+      { new: true }
+    );
+    
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    
+    res.json({ 
+      message: 'Successfully downgraded to basic plan.',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        premium: user.isPremium,
+        plan: null
+      }
+    });
+  } catch (err) {
+    console.error('Premium downgrade error:', err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
 export default profilerouter;
