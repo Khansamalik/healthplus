@@ -52,7 +52,7 @@ export default function HealthcareWebsite() {
             <motion.img
               src="/Ambulance.png"
               alt="Healthcare Banner"
-              className="rounded-xl w-full max-w-md object-cover shadow-md"
+              className="rounded-xl w-full max-w-md object-cover "
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
@@ -63,7 +63,7 @@ export default function HealthcareWebsite() {
 
       {/* Features Showcase */}
       <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ">
           <h1 className="text-center text-3xl font-bold text-[#6C0B14] mb-4">Our Healthcare Solutions</h1>
           <p className="text-center text-gray-600 max-w-2xl mx-auto mb-12">
             Discover comprehensive emergency healthcare features
@@ -71,7 +71,7 @@ export default function HealthcareWebsite() {
           
           <div className="grid md:grid-cols-3 gap-8">
             {/* Alert Feature */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:border-[#6C0B14] hover:-translate-y-2 hover:shadow-2xl overflow-hidden">
               <img src="/alert.png" alt="Alert Feature" className="w-full h-48 object-cover" />
               <div className="p-6">
                 <h3 className="text-xl font-bold text-[#6C0B14] mb-2">Emergency Alert</h3>
@@ -83,7 +83,7 @@ export default function HealthcareWebsite() {
             </div>
             
             {/* Contacts Feature */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:border-[#6C0B14] hover:-translate-y-2 hover:shadow-2xl overflow-hidden">
               <img src="/contact.png" alt="Contacts Feature" className="w-full h-48 object-cover" />
               <div className="p-6">
                 <h3 className="text-xl font-bold text-[#6C0B14] mb-2">Emergency Contacts</h3>
@@ -95,7 +95,7 @@ export default function HealthcareWebsite() {
             </div>
             
             {/* Records Feature */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:border-[#6C0B14] hover:-translate-y-2 hover:shadow-2xl overflow-hidden">
               <img src="/records.png" alt="Records Feature" className="w-full h-48 object-cover" />
               <div className="p-6">
                 <h3 className="text-xl font-bold text-[#6C0B14] mb-2">Medical Records</h3>
@@ -118,21 +118,21 @@ export default function HealthcareWebsite() {
 
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {/* Service 1 */}
-          <div className="bg-white p-8 rounded-xl shadow-sm text-center">
+          <div className="bg-white p-8 rounded-xl shadow-sm hover:border-[#6C0B14] hover:-translate-y-2 hover:shadow-2xl text-center">
             <TbEmergencyBed size={40} className="text-[#6C0B14] mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">Emergency Connect</h3>
             <p className="text-gray-600">Direct ambulance and hospital connection</p>
           </div>
           
           {/* Service 2 */}
-          <div className="bg-white p-8 rounded-xl shadow-sm text-center">
+          <div className="bg-white p-8 rounded-xl shadow-sm hover:border-[#6C0B14] hover:-translate-y-2 hover:shadow-2xl text-center">
             <PiHospitalLight size={40} className="text-[#6C0B14] mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">Hospital Directory</h3>
             <p className="text-gray-600">Real-time bed and doctor availability</p>
           </div>
           
           {/* Service 3 */}
-          <div className="bg-white p-8 rounded-xl shadow-sm text-center">
+          <div className="bg-white p-8 rounded-xl shadow-sm hover:border-[#6C0B14] hover:-translate-y-2 hover:shadow-2xl text-center">
             <BsQrCode size={40} className="text-[#6C0B14] mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">Health ID</h3>
             <p className="text-gray-600">QR-based medical information access</p>
@@ -215,7 +215,7 @@ export default function HealthcareWebsite() {
           </p>
           <Link
             to="/register"
-            className="inline-block bg-white text-[#6C0B14] hover:bg-gray-100 font-bold py-3 px-8 rounded-full text-lg transition-all duration-300"
+            className="inline-block bg-white text-[#6C0B14] hover:bg-gray-200 font-bold py-3 px-8 rounded-full text-lg transition-all duration-300"
           >
             Create Your Account
           </Link>

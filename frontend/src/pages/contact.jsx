@@ -1,14 +1,44 @@
 import { Mail, Phone, MapPin } from "lucide-react";
 import React, { useState } from "react";
+import axios from "axios";
 import Footer from "../components/Footer";
 export default function ContactUs() {
   const [toast, setToast] = useState(false);
+  const [name,setName] = useState("");
+  const [email,setEmail] = useState("");
+  const [message,setMessage] = useState("");
+  const  [phone,setPhone] = useState("");
+  const [subject,setSubject] = useState("");
 
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
+
     e.preventDefault();
+    try {
+    const res = await axios.post("http://localhost:5000/api/contact/send-email", {
+      name: name,
+      email: email,
+      message:message,
+    }, {
+      headers: { "Content-Type": "application/json" }
+    });
+    console.log(res.data);
     setToast(true);
+    setName("");
+    setEmail("");
+    setMessage("");
+    setPhone("");
+    setSubject("");
+    // Hide toast after 3 seconds
     setTimeout(() => setToast(false), 3000);
-  };
+  } catch (err) {
+    if (err.response) {
+      console.log("Error:", err.response.status, err.response.data);
+    } else {
+      console.log("Error:", err.message);
+    }
+    
+  };}
 
   return (
     <div>
@@ -51,20 +81,28 @@ export default function ContactUs() {
             <input
               type="text"
               placeholder="Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="p-3 rounded-lg bg-white/80 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#660000]"
             />
             <input
               type="email"
               placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="p-3 rounded-lg bg-white/80 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#660000]"
             />
             <input
               type="tel"
               placeholder="Phone"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
               className="p-3 rounded-lg bg-white/80 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#660000]"
             />
             <input
               type="text"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
               placeholder="Subject"
               className="p-3 rounded-lg bg-white/80 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#660000]"
             />
@@ -72,6 +110,8 @@ export default function ContactUs() {
 
           <textarea
             rows="5"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
             placeholder="Your Message"
             className="mt-6 w-full p-4 rounded-lg bg-white/80 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#660000]"
           ></textarea>
