@@ -16,6 +16,7 @@ import alertRoutes from './routes/alertRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import iceRoutes from './routes/iceRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
 
 dotenv.config();
 
@@ -52,6 +53,7 @@ app.use('/api/alerts', alertRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/ice', iceRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Start Server
 app.listen(PORT, () => {

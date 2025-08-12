@@ -40,6 +40,38 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  // Keep auth state in sync across tabs/windows and after external changes
+  useEffect(() => {
+    const handleStorage = (e) => {
+      if (e.key === 'token') {
+        const t = localStorage.getItem('token');
+        if (t) {
+          setToken(t);
+          setIsAuthenticated(true);
+        } else {
+          // Token removed → fully logout in memory
+          setIsAuthenticated(false);
+          setIsPremium(false);
+          setPremiumPlan(null);
+          setUser(null);
+          setToken(null);
+        }
+      }
+      if (e.key === 'user') {
+        const u = localStorage.getItem('user');
+        setUser(u ? JSON.parse(u) : null);
+      }
+      if (e.key === 'isPremium' || e.key === 'premiumPlan') {
+        const premium = localStorage.getItem('isPremium') === 'true';
+        const plan = localStorage.getItem('premiumPlan') || null;
+        setIsPremium(premium);
+        setPremiumPlan(plan);
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
   const login = (userData, authToken) => {
     setIsAuthenticated(true);
     setUser(userData);

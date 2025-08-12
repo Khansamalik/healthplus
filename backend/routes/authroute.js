@@ -37,21 +37,40 @@ router.post('/register', async (req, res) => {
 
 //  POST /login with JWT
 router.post('/login', async (req, res) => {
-  const { cnic, password } = req.body;
+  const { cnic, password } = req.body || {};
 
   try {
+    if (!cnic || !password) {
+      return res.status(400).json({ message: 'CNIC and password are required' });
+    }
+
     const user = await User.findOne({ cnic });
-    if (!user)
+    if (!user) {
       return res.status(404).json({ message: 'User not found' });
+    }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch)
+    // Validate stored password exists and looks like a bcrypt hash
+    if (!user.password || typeof user.password !== 'string' || !user.password.startsWith('$2')) {
       return res.status(400).json({ message: 'Invalid credentials' });
+    }
 
+    let isMatch = false;
+    try {
+      isMatch = await bcrypt.compare(password, user.password);
+    } catch (cmpErr) {
+      // Treat any compare error as invalid credentials
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    const secret = process.env.JWT_SECRET || 'dev_secret_change_me';
     // Create JWT
     const token = jwt.sign(
       { userId: user._id },
-      process.env.JWT_SECRET,
+      secret,
       { expiresIn: '1h' }
     );
 
@@ -61,12 +80,13 @@ router.post('/login', async (req, res) => {
       user: {
         id: user._id,
         name: user.name,
-        email: user.email
+        email: user.email,
+        premium: user.isPremium || false,
       }
     });
 
   } catch (err) {
-    console.error(err);
+    console.error('Login error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });

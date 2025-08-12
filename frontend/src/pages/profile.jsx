@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const ProfileInput = ({ label, name, value, onChange, type = "text" }) => (
   <div className="mb-6">
@@ -30,6 +31,7 @@ const ProfileField = ({ label, value, highlight = false }) => (
 
 export default function Profile() {
   const navigate = useNavigate();
+  const { logout, isPremium: authIsPremium, premiumPlan } = useAuth();
   const [user, setUser] = useState(null);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
@@ -38,6 +40,8 @@ export default function Profile() {
     contact: "",
     email: "",
   });
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
 
  
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -50,6 +54,7 @@ export default function Profile() {
   const [passwordError, setPasswordError] = useState("");
 
   const userId = localStorage.getItem("userId");
+  const API = "http://localhost:5000";
   
   if (!userId) {
     navigate("/login");
@@ -59,7 +64,7 @@ export default function Profile() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/profile/${userId}`);
+  const res = await axios.get(`${API}/api/profile/${userId}`);
         setUser(res.data);
         setForm(res.data);
       } catch (err) {
@@ -80,7 +85,7 @@ export default function Profile() {
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.put(`http://localhost:5000/api/profile/${userId}`, form);
+  const res = await axios.put(`${API}/api/profile/${userId}`, form);
       setUser(res.data);
       localStorage.setItem("userProfile", JSON.stringify(res.data));
       setEditing(false);
@@ -88,6 +93,67 @@ export default function Profile() {
     } catch (err) {
       console.error("Failed to update user:", err);
       alert("Failed to update profile.");
+    }
+  };
+
+  const handleLogout = () => {
+    // Clear through auth context so Navbar updates immediately
+    logout();
+    localStorage.removeItem("userId");
+    localStorage.removeItem("userProfile");
+    navigate("/login", { replace: true });
+  };
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const data = new FormData();
+    data.append('avatar', file);
+    try {
+      setAvatarUploading(true);
+  const res = await axios.post(`${API}/api/profile/${userId}/avatar`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      const newAvatar = res.data?.avatar;
+      if (newAvatar) {
+        setUser((prev) => ({ ...prev, avatar: newAvatar }));
+        setForm((prev) => ({ ...prev, avatar: newAvatar }));
+      }
+    } catch (err) {
+      console.error('Avatar upload failed', err);
+      alert('Failed to upload avatar');
+    } finally {
+      setAvatarUploading(false);
+      // reset input so same file can be re-selected
+      e.target.value = '';
+    }
+  };
+
+  const submitPasswordChange = async (e) => {
+    e?.preventDefault?.();
+    setPasswordError("");
+    if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+      setPasswordError('Please fill all fields');
+      return;
+    }
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError('Passwords do not match');
+      return;
+    }
+    try {
+      setPasswordLoading(true);
+      await axios.patch(`${API}/api/profile/${userId}/password`, {
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword,
+      });
+      alert('Password updated successfully');
+      setShowPasswordModal(false);
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err) {
+      const msg = err?.response?.data?.message || 'Failed to update password';
+      setPasswordError(msg);
+    } finally {
+      setPasswordLoading(false);
     }
   };
 
@@ -109,18 +175,25 @@ export default function Profile() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 py-10">
+  <main className="container mx-auto px-6 py-10">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Profile Sidebar */}
           <div className="w-full lg:w-1/3">
             <div className="bg-white rounded-xl shadow-md overflow-hidden">
               <div className="p-6 text-center">
-                <div className="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-[#6C0B14] mb-4">
+                <div className="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-[#6C0B14] mb-4 bg-gray-100">
                   <img 
-                    src={user.avatar || "/profile-placeholder.png"}
-                    alt=""
+                    src={user.avatar ? (user.avatar.startsWith('http') ? user.avatar : `${API}${user.avatar}`) : "/profile-placeholder.png"}
+                    alt="profile"
                     className="w-full h-full object-cover"
+                    onError={(e) => { e.currentTarget.src = "/profile-placeholder.png"; }}
                   />
+                </div>
+                <div className="mt-2">
+                  <label className="inline-flex items-center px-3 py-1.5 text-sm rounded bg-gray-100 hover:bg-gray-200 cursor-pointer">
+                    <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+                    {avatarUploading ? 'Uploading…' : 'Change Photo'}
+                  </label>
                 </div>
                 <h2 className="text-xl font-bold text-gray-800">{user.name}</h2>
                 <p className="text-gray-600 mb-4">{user.email}</p>
@@ -128,13 +201,13 @@ export default function Profile() {
                 <div className="bg-[#F8F1F1] rounded-lg p-4 mb-6">
                   <div className="flex justify-between items-center">
                     <span className="font-medium">Account Status:</span>
-                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${user.premium ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800"}`}>
-                      {user.premium ? "Premium Member" : "Free Account"}
+                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${authIsPremium ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800"}`}>
+                      {authIsPremium ? "Premium Member" : "Free Account"}
                     </span>
                   </div>
-                  {!user.premium && (
+                  {!authIsPremium && (
                     <button
-                      onClick={() => window.location.href = '/premium'}
+                      onClick={() => setShowPayment(true)}
                       className="w-full mt-3 bg-[#6C0B14] text-white py-2 rounded-lg hover:bg-[#8a1220] transition-colors"
                     >
                       Upgrade to Premium
@@ -166,24 +239,20 @@ export default function Profile() {
                     </button>
                   </li>
                   <li>
-                    <a href="/premium" className="flex items-center text-gray-600 hover:text-[#6C0B14] transition-colors">
+                    <button type="button" onClick={() => setShowPayment(true)} className="flex items-center text-gray-600 hover:text-[#6C0B14] transition-colors w-full text-left">
                       <span className="mr-2">💳</span> Payment Methods
-                    </a>
+                    </button>
                   </li>
                   <li>
                     <a href="/notifications" className="flex items-center text-gray-600 hover:text-[#6C0B14] transition-colors">
-                      <span className="mr-2">🔔</span> Notification Settings
+                      <span className="mr-2">🔔</span> Notifications
                     </a>
                   </li>
                    <li>
                     <button
                       type="button"
                       className="flex items-center text-gray-600 hover:text-[#6C0B14] transition-colors w-full"
-                      onClick={() => {
-                        localStorage.removeItem("userId");
-                        localStorage.removeItem("userProfile");
-                        navigate("/login");
-                      }}
+                      onClick={handleLogout}
                     >
                       <span className="mr-2">🚪</span> Logout
                     </button>
@@ -231,8 +300,8 @@ export default function Profile() {
                     <ProfileField label="CNIC" value={user.cnic} />
                     <ProfileField label="Contact Number" value={user.contact} />
                     <ProfileField label="Email Address" value={user.email} />
-                    <ProfileField label="Account Created" value={new Date(user.createdAt).toLocaleDateString()} />
-                    <ProfileField label="Last Updated" value={new Date(user.updatedAt).toLocaleDateString()} />
+                    <ProfileField label="Account Created" value={user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '—'} />
+                    <ProfileField label="Last Updated" value={user.updatedAt ? new Date(user.updatedAt).toLocaleDateString() : '—'} />
                   </div>
                 )}
               </div>
@@ -248,24 +317,20 @@ export default function Profile() {
                     <div className="space-y-4">
                       <ProfileField 
                         label="Membership Type" 
-                        value={user.premium ? "Premium" : "Free"} 
-                        highlight={user.premium}
+                        value={authIsPremium ? "Premium" : "Free"} 
+                        highlight={authIsPremium}
                       />
-                      {user.premium ? (
+                      {authIsPremium ? (
                         <>
-                          <ProfileField label="Subscription Start" value={new Date(user.subscriptionStart).toLocaleDateString()} />
-                          <ProfileField label="Subscription End" value={new Date(user.subscriptionEnd).toLocaleDateString()} />
+                          <ProfileField label="Plan" value={premiumPlan === 'annual' ? 'Annual' : 'Pro Care'} />
+                          <ProfileField label="Subscription Start" value={user.subscriptionStart ? new Date(user.subscriptionStart).toLocaleDateString() : '—'} />
+                          <ProfileField label="Subscription End" value={user.subscriptionEnd ? new Date(user.subscriptionEnd).toLocaleDateString() : '—'} />
                           <ProfileField label="Auto Renewal" value={user.autoRenew ? "Enabled" : "Disabled"} />
                         </>
                       ) : (
                         <div className="text-center py-4">
                           <p className="text-gray-600 mb-4">Upgrade to unlock premium features</p>
-                          <button
-                            onClick={() => window.location.href = '/premium'}
-                            className="px-6 py-2 bg-[#6C0B14] text-white rounded-lg hover:bg-[#8a1220] transition-colors"
-                          >
-                            View Subscription Plans
-                          </button>
+                          <button onClick={() => setShowPayment(true)} className="px-6 py-2 bg-[#6C0B14] text-white rounded-lg hover:bg-[#8a1220] transition-colors">View Payment Methods</button>
                         </div>
                       )}
                     </div>
@@ -304,6 +369,83 @@ export default function Profile() {
           </div>
         </div>
       </main>
+  {/* Modals */}
+  <PaymentMethodsModal open={showPayment} onClose={() => setShowPayment(false)} />
+      <PasswordModal
+        open={showPasswordModal}
+        onClose={() => setShowPasswordModal(false)}
+        onSubmit={submitPasswordChange}
+        form={passwordForm}
+        setForm={setPasswordForm}
+        loading={passwordLoading}
+        error={passwordError}
+      />
+    </div>
+  );
+}
+
+// Inline password modal
+function PasswordModal({ open, onClose, onSubmit, form, setForm, loading, error }) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white w-full max-w-md rounded-xl shadow-lg">
+        <div className="p-4 border-b flex justify-between items-center">
+          <h3 className="text-lg font-semibold text-[#6C0B14]">Change Password</h3>
+          <button className="text-gray-500 hover:text-gray-700" onClick={onClose}>✕</button>
+        </div>
+        <form onSubmit={onSubmit} className="p-6 space-y-4">
+          {error && <div className="text-red-600 text-sm">{error}</div>}
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">Current Password</label>
+            <input type="password" value={form.currentPassword} onChange={(e)=>setForm({...form, currentPassword: e.target.value})} className="w-full border rounded-lg px-3 py-2" />
+          </div>
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">New Password</label>
+            <input type="password" value={form.newPassword} onChange={(e)=>setForm({...form, newPassword: e.target.value})} className="w-full border rounded-lg px-3 py-2" />
+          </div>
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">Confirm New Password</label>
+            <input type="password" value={form.confirmPassword} onChange={(e)=>setForm({...form, confirmPassword: e.target.value})} className="w-full border rounded-lg px-3 py-2" />
+          </div>
+          <div className="flex justify-end gap-3 pt-2">
+            <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg border">Cancel</button>
+            <button type="submit" disabled={loading} className={`px-4 py-2 rounded-lg text-white ${loading ? 'bg-gray-400' : 'bg-[#6C0B14] hover:bg-[#8a1220]'}`}>
+              {loading ? 'Saving…' : 'Change Password'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function PaymentMethodsModal({ open, onClose }) {
+  if (!open) return null;
+  const items = [
+    { name: 'Credit/Debit Cards', icon: '💳' },
+    { name: 'EasyPaisa', icon: '📱' },
+    { name: 'JazzCash', icon: '📲' },
+  ];
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white w-full max-w-md rounded-xl shadow-lg">
+        <div className="p-4 border-b flex justify-between items-center">
+          <h3 className="text-lg font-semibold text-[#6C0B14]">We Accept</h3>
+          <button className="text-gray-500 hover:text-gray-700" onClick={onClose}>✕</button>
+        </div>
+        <div className="p-6 space-y-3">
+          {items.map(i => (
+            <div key={i.name} className="flex items-center gap-3 p-3 border rounded-lg">
+              <span className="text-xl">{i.icon}</span>
+              <span className="font-medium">{i.name}</span>
+            </div>
+          ))}
+        </div>
+        <div className="p-4 border-t flex justify-end">
+          <button onClick={onClose} className="px-4 py-2 rounded-lg bg-[#6C0B14] text-white hover:bg-[#8a1220]">Close</button>
+        </div>
+      </div>
     </div>
   );
 }
