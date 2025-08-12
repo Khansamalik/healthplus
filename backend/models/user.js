@@ -26,6 +26,9 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true    
   },
+  avatar: {
+    type: String,
+  },
   password: {
     type: String
   },
@@ -43,7 +46,7 @@ const userSchema = new mongoose.Schema({
     location: String,
     contact: String,
   },
-});
+}, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);
 export default User;

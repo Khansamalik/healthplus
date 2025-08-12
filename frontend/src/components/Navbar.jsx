@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { 
   FaUser, 
@@ -25,6 +25,22 @@ function Navbar() {
   // const [profileDropdown, setProfileDropdown] = useState(false);
   const { isAuthenticated, isPremium, premiumPlan, logout } = useAuth(); // Get auth state and premium status
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Clear auth immediately and move to login
+    logout();
+    setIsOpen(false);
+    setDropdownOpen(false);
+    navigate('/login', { replace: true });
+  };
+
+  // Close any open menus when auth state changes (prevents stale UI)
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setIsOpen(false);
+      setDropdownOpen(false);
+    }
+  }, [isAuthenticated]);
 
   return (
     <nav className="bg-white shadow-md fixed w-full z-50">
@@ -171,6 +187,7 @@ function Navbar() {
                       
                     </button>
                     
+                    
                     {/* {profileDropdown && (
                       <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
                         <div className="px-4 py-2 text-sm text-gray-500 border-b">
@@ -216,6 +233,7 @@ function Navbar() {
                       <FaUserCircle className="text-2xl" />
                       <span>Profile</span>
                     </button>
+                    
                     
                     {/* {profileDropdown && (
                       <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
@@ -360,6 +378,13 @@ function Navbar() {
                       <span>Profile</span>
                       
                     </button>
+                    <button 
+                      onClick={handleLogout}
+                      className="flex items-center space-x-2 text-lg text-gray-800 hover:text-[#A0153E] px-3 py-2 font-medium"
+                    >
+                      <FaSignOutAlt className="text-2xl" />
+                      <span>Logout</span>
+                    </button>
                 </div>
               </>
             ) : (
@@ -406,6 +431,13 @@ function Navbar() {
                       <FaUserCircle className="text-2xl" />
                       <span>Profile</span>
                       
+                    </button>
+                    <button 
+                      onClick={handleLogout}
+                      className="flex items-center space-x-2 text-lg text-gray-800 hover:text-[#A0153E] px-3 py-2 font-medium"
+                    >
+                      <FaSignOutAlt className="text-2xl" />
+                      <span>Logout</span>
                     </button>
                 </div>
               </>
