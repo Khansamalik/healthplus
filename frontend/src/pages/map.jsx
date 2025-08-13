@@ -112,7 +112,7 @@ function ModernControls({
 
   return (
     <>
-    
+     
       {/* Main Control Panel */}
       <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">
         {/* Location Button */}
@@ -624,7 +624,7 @@ export default function MapView() {
   };
 
   return (
-    
+    <div className=''>
     <div className="h-screen w-full bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       {/* Back button */}
       <button 
@@ -716,6 +716,7 @@ export default function MapView() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

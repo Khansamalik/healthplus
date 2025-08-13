@@ -310,7 +310,7 @@ export default function HealthAppPage() {
                 Sehat ka raabta,
               </h1>
               
-              <p className="text-xl md:text-2xl opacity-90">
+              <p className="text-xl md:text-2xl opacity-20">
                 Har waqt aap ke saath
               </p>
             </div>
@@ -568,7 +568,7 @@ export default function HealthAppPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-transperant backdrop-blur-sm flex items-center justify-center z-50 p-4"
             onClick={() => setShowEmergencyPopup(false)}
           >
             <motion.div 
@@ -605,12 +605,12 @@ export default function HealthAppPage() {
                   onClick={() => navigate('/alert')}
                   className="w-full p-4 bg-gradient-to-r from-[#6C0B14] to-[#8a0f1a] text-white rounded-xl font-semibold hover:from-[#8a0f1a] hover:to-[#6C0B14] transition-all duration-200 shadow-lg hover:shadow-xl flex items-center group"
                 >
-                  <div className="bg-white bg-opacity-20 p-2 rounded-full mr-4 group-hover:bg-opacity-30 transition-all flex-shrink-0">
+                  <div className="bg-white bg-opacity-20 p-2 rounded-full mr-4 group-hover:bg-opacity-20 transition-all flex-shrink-0">
                     <FaUserFriends className="text-xl" />
                   </div>
                   <div className="text-left flex-1">
                     <div className="font-bold text-lg">Alert Emergency Contacts</div>
-                    <div className="text-sm opacity-90">Send alert to your saved contacts</div>
+                    <div className="text-sm opacity-20">Send alert to your saved contacts</div>
                   </div>
                 </motion.button>
 
@@ -625,7 +625,7 @@ export default function HealthAppPage() {
                   </div>
                   <div className="text-left flex-1">
                     <div className="font-bold text-lg">Call Ambulance</div>
-                    <div className="text-sm opacity-90">Request ambulance with your location</div>
+                    <div className="text-sm opacity-20">Request ambulance with your location</div>
                   </div>
                 </motion.button>
 
@@ -640,7 +640,7 @@ export default function HealthAppPage() {
                   </div>
                   <div className="text-left flex-1">
                     <div className="font-bold text-lg">Find Emergency Rooms</div>
-                    <div className="text-sm opacity-90">Locate nearest emergency facilities</div>
+                    <div className="text-sm opacity-20">Locate nearest emergency facilities</div>
                   </div>
                 </motion.button>
               </div>
@@ -666,7 +666,7 @@ export default function HealthAppPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-transperant backdrop-blur-sm flex items-center justify-center z-50 p-4"
             onClick={() => setShowOrderPopup(false)}
           >
             <motion.div 
@@ -791,7 +791,7 @@ export default function HealthAppPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-transperant backdrop-blur-sm flex items-center justify-center z-50 p-4"
             onClick={() => setShowMedicalCard(false)}
           >
             <motion.div 
@@ -878,7 +878,7 @@ export default function HealthAppPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-transperant backdrop-blur-sm flex items-center justify-center z-50 p-4"
             onClick={() => setShowEmergencyContactCard(false)}
           >
             <motion.div 
@@ -965,7 +965,7 @@ export default function HealthAppPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-transperant backdrop-blur-sm flex items-center justify-center z-50 p-4"
             onClick={() => setShowEmergencyCard(false)}
           >
             <motion.div 
@@ -1051,7 +1051,7 @@ export default function HealthAppPage() {
 
       {/* Hospital Recommendations Popup */}
       {showHospitalPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-transperant backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl border border-[#f0f0f0] w-full max-w-5xl max-h-[85vh] overflow-y-auto">
             <div className="bg-gradient-to-r from-[#8B0000] to-[#a00000] p-4 sticky top-0 z-10 flex items-center justify-between">
               <div className="flex items-center">
@@ -1199,3 +1199,5 @@ function FacilityItem({ name, details }) {
     </motion.div>
   );
 }
+
+
